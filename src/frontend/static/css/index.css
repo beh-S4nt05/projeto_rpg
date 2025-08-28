@@ -1,0 +1,219 @@
+@import url(../css/rootStyle.css);
+
+html > body {
+    width: 100vw;
+    height: auto;
+    display: flex;
+    font-family: 'Jomhuria', serif;
+    font-size: 1.6em;
+    letter-spacing: 2px;
+}
+
+html > header {
+    display: fixed;
+    height: 100vh;
+    width: calc(100vw - 75vw);
+    font-family: 'Jomhuria', serif;
+    font-size: 1.6em;
+    letter-spacing: 2px;
+}
+
+article {
+    display: flex;
+    width: 100%;
+    height: 100%;    
+}
+
+.scroller {
+    width: 10px;
+    height: 40px;
+    overflow-y: scroll;
+    scrollbar-width: 3px;
+}
+
+.grade {
+    display: flex;
+    width: 100dvw;
+    height: 100dvh;
+    background: var(--backBlue);
+    flex-direction: row;
+    align-self: center;
+    justify-content: space-evenly;
+    column-gap: 15px;
+    padding: 12px 8px;
+}
+
+.menu {
+    height: 100dvh;
+    width: 3.2rem;
+    display: flex;
+    z-index: 10;
+    flex-direction: row;
+    justify-self: start;
+    left: 0;
+    position: relative;
+    overflow: visible;
+}
+
+.menu>ul {
+    width: auto;
+    height: auto;
+    background: yellow;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    justify-self: center;
+    justify-items: center;
+    align-items: center;
+    gap: 4px 0px;
+    padding: 5px 0px 0px;
+}
+
+.menu>ul>li {
+    width: 100%;
+    height: auto;
+    display: flex;
+    column-gap: 12px;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 10px;
+}
+
+.menu>ul>li:hover {
+    cursor: pointer;
+    width: 100%;
+    overflow: visible;
+}
+
+.menu>ul>li>i {
+    width: 30px;
+    height: 100%;
+    overflow: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.12em;
+}
+
+.menu>ul>li>p {
+    display: none;
+    margin-left: 12px;
+}
+
+.menu > ul > li > span {
+    display: none;
+    width: 100%;
+    margin-left: 12px;
+}
+
+.menu>ul>li:hover>span {
+    display: flex;
+    background-color: #fafdff;
+    position: absolute;
+    width: auto;
+    padding: 7px;
+    margin: 0px -9.3dvw 0px 0px;
+    border-radius: 10px;
+    left: 2.5em;
+}
+
+.col1 {
+    background: var(--backRoxo);
+    width: 42dvw;
+    height: 100%;
+    color: var(--cYlw);
+    overflow-y: hidden;
+    position: relative;
+    border-radius: 50px;
+    padding: 30px 20px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+}
+
+.col2 {
+    background: var(--backRoxo);
+    width: 42dvw;
+    height: 100%;
+    margin-right: 100px;
+    color: var(--cYlw);
+    overflow-y: scroll !important;
+    position: relative !important;
+    border-radius: 50px;
+    padding: 30px 42px 20px 28px;
+}
+
+.divisorAtributes {
+    display: flex;
+    gap: 15px;
+}
+
+.atributosAvatar span {
+    text-align: end;
+    width: 46px;
+}
+
+button {
+    width: 40px;
+    height: 40px;
+    border-radius: 30%;
+}
+
+#dados {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
+
+#atributos {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    row-gap: 8px;
+}
+
+.dadosAvatar {
+    display: grid;
+    grid-template-areas: "col1 col1 col1 col2 col2 col3 col3";
+    width: 100%;
+    gap: 2px;
+}
+
+.dadosAvatar > p {
+    width: 300px;
+}
+
+.dadosAvatar input, .dadosAvatar select {
+    display: grid;
+    width: 150px;
+    justify-self: center;
+    grid-area: col2;
+    MARGIN-BOTTOM: 0.2EM;
+    BORDER-BOTTOM: #0c1ba1 SOLID 3PX;
+    BORDER-RADIUS: 0PX 0PX 0.2EM 0.2EM;
+}
+
+.atributosAvatar {
+    display: grid;
+    grid-template-areas: "col1 col1 col1 col2 col2 col3 col3";
+    width: 100%;
+    gap: 2px;
+}
+
+.atributosAvatar > p {
+    display: flex;
+    width: 150px;
+    align-self: center;
+    justify-content: space-between;
+}
+
+.col2 details{
+    width: 100%;
+    text-rendering: optimizeSpeed;
+}
+
+.col2 p {
+    text-align: justify;
+}

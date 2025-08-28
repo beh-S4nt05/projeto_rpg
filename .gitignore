@@ -1,0 +1,29 @@
+# Node.js ignore file
+
+# Logs
+logs
+*.log
+
+# Node modules
+node_modules/
+
+# dados do bacno
+src/postgresql/
+
+# migrations do prisma
+prisma/migrations/
+
+# npm
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Miscellaneous
+*.env*
+*.tmp

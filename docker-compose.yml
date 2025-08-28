@@ -1,0 +1,13 @@
+version: '3.8'  # ou 3.x – "17.5" não é uma versão válida
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admBreno0
+      POSTGRES_PASSWORD: Bss@_134725
+      POSTGRES_DB: postgres
+    volumes: 
+      - ./src/postgresql/data:/var/lib/postgresql/data
