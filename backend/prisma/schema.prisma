@@ -1,0 +1,281 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// DOMAIN MODELS - RPG Game
+// ============================================
+
+// User Aggregate Root
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  name         String
+  email        String    @unique
+  password     String
+  phone        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  avatar      Avatar?   @relation("UserAvatar")
+  authSessions AuthSession[]
+  authProviders AuthProvider[]
+
+  @@map("users")
+}
+
+// Avatar Aggregate
+model Avatar {
+  id            String    @id @default(uuid())
+  name          String
+  raceId        Int
+  race          Races    @relation(fields: [raceId], references: [id])
+  level         Int       @default(1)
+  tier          Int       @default(1)
+  experience    Int       @default(0)
+  userId        String    @unique
+  user          User      @relation("UserAvatar", fields: [userId], references: [id])
+
+  // Relations
+  atributos     Atributos @relation("AvatarAtributos")
+  habilidades   Habilidade[]
+  inventory     Inventory
+  quests        Quest[]
+  rewards       Reward[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("avatars")
+}
+
+// Atributos (Attributes)
+model Atributos {
+  id               String    @id @default(uuid())
+  strength         Int       @default(10)
+  agility          Int       @default(10)
+  defence          Int       @default(10)
+  resistance       Int       @default(10)
+  intelligence     Int       @default(10)
+  vitality         Int       @default(10)
+  energyPoints     Int       @default(100)
+  attributePoints  Int       @default(5)
+  skillPoints      Int       @default(5)
+  avatarId         String    @unique
+  avatar           Avatar    @relation("AvatarAtributos", fields: [avatarId], references: [id])
+
+  energyTypes      EnergyTypes[]
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("atributos")
+}
+
+// Races
+model Races {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  description String
+  Avatar      Avatar[]
+
+  @@map("races")
+}
+
+// Energy Types
+model Energy_types {
+  id          Int       @id @default(autoincrement())
+  atributos   Atributos @relation(fields: [atributosId], references: [id])
+  atributosId String
+  energia     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("energy_types")
+}
+
+// Habilidade (Skills/Abilities)
+enum HabilityType {
+  Active
+  Passive
+}
+
+model Habilidade {
+  id          Int            @id @default(autoincrement())
+  avatar      Avatar         @relation(fields: [avatarId], references: [id])
+  avatarId    String
+  name        String
+  duration    Int
+  power       Int
+  effect      String
+  type        HabilityType
+  energyCost  String
+  level       Int            @default(1)
+  tier        Int            @default(1)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("habilidades")
+}
+
+// Inventory
+model Inventory {
+  id         String   @id @default(uuid())
+  avatar     Avatar   @relation(fields: [avatarId], references: [id])
+  avatarId   String   @unique
+  pesoMax    Int      @default(100)
+  pesoActual Int      @default(0)
+  items      Item[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("inventory")
+}
+
+// Item Types
+enum ItemQuality {
+  comum
+  raro
+  epico
+  lendario
+}
+
+enum ItemType {
+  arma
+  armadura
+  pocao
+  material
+}
+
+model Item {
+  id          String      @id @default(uuid())
+  inventory   Inventory   @relation(fields: [inventoryId], references: [id])
+  inventoryId String
+  name        String      @unique
+  description String
+  peso        Int
+  quality     ItemQuality
+  itemType    ItemType
+  rules       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  Reward      Reward[]
+
+  @@map("items")
+}
+
+// Quest System
+enum QuestStatus {
+  pendente
+  emAndamento
+  concluida
+  falha
+}
+
+model Quest {
+  id            String      @id @default(uuid())
+  avatar        Avatar      @relation(fields: [avatarId], references: [id])
+  avatarId      String
+  name          String
+  description   String
+  status        QuestStatus @default(pendente)
+  completed     Boolean     @default(false)
+  currentStage  Int         @default(1)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("quests")
+}
+
+// Reward System
+enum RewardType {
+  Moeda
+  Item
+  Experiencia
+}
+
+model Reward {
+  id          String     @id @default(uuid())
+  avatar      Avatar?    @relation(fields: [avatarId], references: [id])
+  avatarId    String?
+  type        String
+  value       String
+  quantity    Int        @default(1)
+  actionType  String?
+  actionId    String?
+  item        Item?      @relation(fields: [itemId], references: [id])
+  itemId      String?
+  rewardType  RewardType
+  moedaAmount Int?
+  xpAmount    Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("rewards")
+}
+
+// Monster System
+model Monster {
+  id          Int      @id @default(autoincrement())
+  name        String
+  atributos   Atributos   @relation(fields: [atributosId], references: [id])
+  atributosId String      @unique
+  description String
+  level       Int
+  inventory   Inventory[]
+  rewards     Reward[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("monsters")
+}
+
+// Event System
+model Event {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  rewards     Reward[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("events")
+}
+
+// Authentication
+model AuthSession {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("auth_sessions")
+}
+
+model AuthProvider {
+  id           String   @id @default(uuid())
+  provider     String   // 'google', 'facebook', 'github'
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  providerUserId String // ID do usuário no provedor
+  accessToken  String?
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([provider, providerUserId])
+  @@map("auth_providers")
+}
