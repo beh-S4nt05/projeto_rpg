@@ -1,13 +1,72 @@
-version: '3.8'  # ou 3.x – "17.5" não é uma versão válida
+version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
-    image: postgres:latest
+    image: postgres:15
+    container_name: rpg_postgres
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: admBreno0
       POSTGRES_PASSWORD: Bss@_134725
-      POSTGRES_DB: postgres
-    volumes: 
-      - ./src/postgresql/data:/var/lib/postgresql/data
+      POSTGRES_DB: rpg_game
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admBreno0 -d rpg_game"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rpg-network
+
+  # Backend API (NestJS)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rpg_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://admBreno0:Bss@_134725@postgres:5432/rpg_game?schema=public
+      - JWT_SECRET=your-very-secure-secret-key-change-in-production
+      - JWT_EXPIRES_IN=1d
+      - FRONTEND_URL=http://localhost:19006
+      - SWAGGER_ENABLED=true
+      - SWAGGER_PATH=/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rpg-network
+    restart: unless-stopped
+
+  # Frontend (React Native - Expo Dev Server)
+  # Note: For production, you would build the app separately
+  frontend:
+    image: node:18-alpine
+    container_name: rpg_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "19006:19006"
+    environment:
+      - NODE_ENV=development
+      - REACT_NATIVE_PACKAGER_HOSTNAME=localhost
+    command: sh -c "npm install && npx expo start --dev-client"
+    networks:
+      - rpg-network
+    profiles:
+      - dev
+
+volumes:
+  postgres_data:
+
+networks:
+  rpg-network:
+    driver: bridge
