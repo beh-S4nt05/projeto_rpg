@@ -1,5 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// ============================================
+// RPG GAME DATABASE SCHEMA
+// Normalizado (3FN) - DDD Oriented
+// ============================================
 
 generator client {
   provider = "prisma-client-js"
@@ -11,249 +13,30 @@ datasource db {
 }
 
 // ============================================
-// DOMAIN MODELS - RPG Game
+// DOMAIN: USER & AUTHENTICATION
 // ============================================
 
-// User Aggregate Root
 model User {
-  id           String    @id @default(uuid())
-  username     String    @unique
-  name         String
-  email        String    @unique
-  password     String
-  phone        String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
+  id        String    @id @default(uuid())
+  username  String    @unique
+  name      String
+  email     String    @unique
+  password  String
+  phone     String?
+  
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
   // Relations
-  avatar      Avatar?   @relation("UserAvatar")
-  authSessions AuthSession[]
-  authProviders AuthProvider[]
-
+  avatar    Avatar?   @relation("UserToAvatar")
+  sessions  AuthSession[]
+  providers AuthProvider[]
+  
   @@map("users")
 }
 
-// Avatar Aggregate
-model Avatar {
-  id            String    @id @default(uuid())
-  name          String
-  raceId        Int
-  race          Races    @relation(fields: [raceId], references: [id])
-  level         Int       @default(1)
-  tier          Int       @default(1)
-  experience    Int       @default(0)
-  userId        String    @unique
-  user          User      @relation("UserAvatar", fields: [userId], references: [id])
-
-  // Relations
-  atributos     Atributos @relation("AvatarAtributos")
-  habilidades   Habilidade[]
-  inventory     Inventory
-  quests        Quest[]
-  rewards       Reward[]
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@map("avatars")
-}
-
-// Atributos (Attributes)
-model Atributos {
-  id               String    @id @default(uuid())
-  strength         Int       @default(10)
-  agility          Int       @default(10)
-  defence          Int       @default(10)
-  resistance       Int       @default(10)
-  intelligence     Int       @default(10)
-  vitality         Int       @default(10)
-  energyPoints     Int       @default(100)
-  attributePoints  Int       @default(5)
-  skillPoints      Int       @default(5)
-  avatarId         String    @unique
-  avatar           Avatar    @relation("AvatarAtributos", fields: [avatarId], references: [id])
-
-  energyTypes      EnergyTypes[]
-
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  @@map("atributos")
-}
-
-// Races
-model Races {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
-  description String
-  Avatar      Avatar[]
-
-  @@map("races")
-}
-
-// Energy Types
-model Energy_types {
-  id          Int       @id @default(autoincrement())
-  atributos   Atributos @relation(fields: [atributosId], references: [id])
-  atributosId String
-  energia     String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("energy_types")
-}
-
-// Habilidade (Skills/Abilities)
-enum HabilityType {
-  Active
-  Passive
-}
-
-model Habilidade {
-  id          Int            @id @default(autoincrement())
-  avatar      Avatar         @relation(fields: [avatarId], references: [id])
-  avatarId    String
-  name        String
-  duration    Int
-  power       Int
-  effect      String
-  type        HabilityType
-  energyCost  String
-  level       Int            @default(1)
-  tier        Int            @default(1)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  @@map("habilidades")
-}
-
-// Inventory
-model Inventory {
-  id         String   @id @default(uuid())
-  avatar     Avatar   @relation(fields: [avatarId], references: [id])
-  avatarId   String   @unique
-  pesoMax    Int      @default(100)
-  pesoActual Int      @default(0)
-  items      Item[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@map("inventory")
-}
-
-// Item Types
-enum ItemQuality {
-  comum
-  raro
-  epico
-  lendario
-}
-
-enum ItemType {
-  arma
-  armadura
-  pocao
-  material
-}
-
-model Item {
-  id          String      @id @default(uuid())
-  inventory   Inventory   @relation(fields: [inventoryId], references: [id])
-  inventoryId String
-  name        String      @unique
-  description String
-  peso        Int
-  quality     ItemQuality
-  itemType    ItemType
-  rules       String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  Reward      Reward[]
-
-  @@map("items")
-}
-
-// Quest System
-enum QuestStatus {
-  pendente
-  emAndamento
-  concluida
-  falha
-}
-
-model Quest {
-  id            String      @id @default(uuid())
-  avatar        Avatar      @relation(fields: [avatarId], references: [id])
-  avatarId      String
-  name          String
-  description   String
-  status        QuestStatus @default(pendente)
-  completed     Boolean     @default(false)
-  currentStage  Int         @default(1)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  @@map("quests")
-}
-
-// Reward System
-enum RewardType {
-  Moeda
-  Item
-  Experiencia
-}
-
-model Reward {
-  id          String     @id @default(uuid())
-  avatar      Avatar?    @relation(fields: [avatarId], references: [id])
-  avatarId    String?
-  type        String
-  value       String
-  quantity    Int        @default(1)
-  actionType  String?
-  actionId    String?
-  item        Item?      @relation(fields: [itemId], references: [id])
-  itemId      String?
-  rewardType  RewardType
-  moedaAmount Int?
-  xpAmount    Int?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  @@map("rewards")
-}
-
-// Monster System
-model Monster {
-  id          Int      @id @default(autoincrement())
-  name        String
-  atributos   Atributos   @relation(fields: [atributosId], references: [id])
-  atributosId String      @unique
-  description String
-  level       Int
-  inventory   Inventory[]
-  rewards     Reward[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  @@map("monsters")
-}
-
-// Event System
-model Event {
-  id          String   @id @default(uuid())
-  name        String
-  description String
-  startDate   DateTime
-  endDate     DateTime
-  rewards     Reward[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("events")
-}
-
-// Authentication
+// Authentication Session
 model AuthSession {
   id        String   @id @default(uuid())
   token     String   @unique
@@ -261,21 +44,719 @@ model AuthSession {
   user      User     @relation(fields: [userId], references: [id])
   expiresAt DateTime
   createdAt DateTime @default(now())
-
+  
+  @@index([userId])
   @@map("auth_sessions")
 }
 
+// External Auth Providers (Google, Facebook, etc.)
 model AuthProvider {
   id           String   @id @default(uuid())
-  provider     String   // 'google', 'facebook', 'github'
+  provider     String   // google, facebook, github, etc.
   userId       String
   user         User     @relation(fields: [userId], references: [id])
-  providerUserId String // ID do usuário no provedor
+  providerUserId String // User ID from the provider
   accessToken  String?
   refreshToken String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
+  
   @@unique([provider, providerUserId])
+  @@index([userId])
   @@map("auth_providers")
+}
+
+// ============================================
+// DOMAIN: CHARACTER (AVATAR)
+// ============================================
+
+// Character Race (Normalized - 2FN)
+model Race {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String
+  
+  // Stats modifiers for this race
+  strengthModifier    Int    @default(0)
+  agilityModifier     Int    @default(0)
+  defenceModifier     Int    @default(0)
+  resistanceModifier  Int    @default(0)
+  intelligenceModifier Int   @default(0)
+  vitalityModifier    Int    @default(0)
+  
+  // Relations
+  avatars    Avatar[]
+  
+  @@map("races")
+}
+
+// Character Class (Normalized - 2FN)
+model CharacterClass {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String
+  
+  // Base stats for this class
+  baseStrength      Int    @default(10)
+  baseAgility       Int    @default(10)
+  baseDefence       Int    @default(10)
+  baseResistance    Int    @default(10)
+  baseIntelligence  Int    @default(10)
+  baseVitality     Int    @default(10)
+  
+  // Growth rates per level
+  strengthGrowth    Float   @default(0.5)
+  agilityGrowth     Float   @default(0.5)
+  defenceGrowth     Float   @default(0.5)
+  resistanceGrowth  Float   @default(0.5)
+  intelligenceGrowth Float @default(0.5)
+  vitalityGrowth    Float   @default(0.5)
+  
+  // Relations
+  avatars    Avatar[]
+  skills     ClassSkill[]
+  
+  @@map("character_classes")
+}
+
+// User Avatar/Character (Aggregate Root)
+model Avatar {
+  id              String   @id @default(uuid())
+  name            String
+  
+  // Relations
+  userId          String   @unique
+  user            User     @relation("UserToAvatar", fields: [userId], references: [id])
+  raceId          Int
+  race            Race     @relation(fields: [raceId], references: [id])
+  classId         Int?
+  characterClass  CharacterClass? @relation(fields: [classId], references: [id])
+  
+  // Stats
+  level           Int      @default(1)
+  experience      Int      @default(0)
+  experienceToNextLevel Int @default(100)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  attributes      Attributes?     @relation("AvatarToAttributes")
+  inventory       Inventory?      @relation("AvatarToInventory")
+  skills          AvatarSkill[]
+  quests          Quest[]
+  rewards         Reward[]
+  equipment       Equipment[]
+  
+  @@unique([userId])
+  @@index([userId, raceId, classId])
+  @@map("avatars")
+}
+
+// ============================================
+// DOMAIN: ATTRIBUTES (Normalized - 3FN)
+// ============================================
+
+// Character Attributes
+model Attributes {
+  id               String   @id @default(uuid())
+  
+  // Relation
+  avatarId         String   @unique
+  avatar           Avatar   @relation("AvatarToAttributes", fields: [avatarId], references: [id])
+  
+  // Primary Attributes
+  strength         Int      @default(10)
+  agility          Int      @default(10)
+  defence          Int      @default(10)
+  resistance       Int      @default(10)
+  intelligence     Int      @default(10)
+  vitality         Int      @default(10)
+  
+  // Secondary Attributes (derived)
+  energyPoints     Int      @default(100)
+  attributePoints  Int      @default(5)
+  skillPoints      Int      @default(5)
+  
+  // Timestamps
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([avatarId])
+  @@map("attributes")
+}
+
+// ============================================
+// DOMAIN: INVENTORY & ITEMS
+// ============================================
+
+// Inventory (Normalized - 2FN)
+model Inventory {
+  id              String   @id @default(uuid())
+  
+  // Relation
+  avatarId        String   @unique
+  avatar          Avatar   @relation("AvatarToInventory", fields: [avatarId], references: [id])
+  
+  // Capacity
+  maxWeight       Int      @default(100)
+  currentWeight   Int      @default(0)
+  maxSlots        Int      @default(20)
+  usedSlots       Int      @default(0)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  items           InventoryItem[]
+  
+  @@index([avatarId])
+  @@map("inventories")
+}
+
+// Item Type (Normalized - 2FN)
+enum ItemType {
+  WEAPON
+  ARMOR
+  POTION
+  MATERIAL
+  FOOD
+  SCROLL
+  GEM
+  QUEST
+  MISC
+}
+
+// Item Quality/Rarity (Normalized - 2FN)
+enum ItemQuality {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+  ARTIFACT
+}
+
+// Item (Normalized - 3FN)
+model Item {
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  
+  // Type and Quality
+  type            ItemType
+  quality         ItemQuality
+  
+  // Stats
+  weight          Int      @default(1)
+  value           Int      @default(0)
+  
+  // Equipment stats (if applicable)
+  strengthBonus   Int      @default(0)
+  agilityBonus    Int      @default(0)
+  defenceBonus    Int      @default(0)
+  resistanceBonus Int      @default(0)
+  intelligenceBonus Int    @default(0)
+  vitalityBonus   Int      @default(0)
+  healthBonus     Int      @default(0)
+  energyBonus     Int      @default(0)
+  
+  // Requirements
+  requiredLevel   Int      @default(1)
+  requiredClassId Int?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  inventoryItems  InventoryItem[]
+  equipment       Equipment[]
+  craftingRecipes CraftingRecipe[]
+  
+  @@index([type, quality])
+  @@map("items")
+}
+
+// Inventory Item (Junction table - resolves N:N between Inventory and Item)
+model InventoryItem {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  inventoryId     String
+  inventory       Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  itemId          String
+  item            Item     @relation(fields: [itemId], references: [id])
+  
+  // Quantity and position
+  quantity        Int      @default(1)
+  slot            Int?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([inventoryId, itemId])
+  @@index([inventoryId])
+  @@index([itemId])
+  @@map("inventory_items")
+}
+
+// ============================================
+// DOMAIN: EQUIPMENT
+// ============================================
+
+// Equipment Slots (Normalized - 2FN)
+enum EquipmentSlot {
+  HEAD
+  BODY
+  LEGS
+  FEET
+  HANDS
+  MAIN_HAND
+  OFF_HAND
+  RING_1
+  RING_2
+  NECKLACE
+  BELT
+}
+
+// Equipped Items
+model Equipment {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  avatarId        String
+  avatar          Avatar   @relation(fields: [avatarId], references: [id], onDelete: Cascade)
+  itemId          String
+  item            Item     @relation(fields: [itemId], references: [id])
+  
+  // Slot
+  slot            EquipmentSlot
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([avatarId, slot])
+  @@index([avatarId])
+  @@map("equipment")
+}
+
+// ============================================
+// DOMAIN: SKILLS & ABILITIES
+// ============================================
+
+// Skill Type (Normalized - 2FN)
+enum SkillType {
+  ACTIVE
+  PASSIVE
+  TOGGLE
+}
+
+// Skill Effect (Normalized - 2FN)
+enum SkillEffect {
+  DAMAGE
+  HEAL
+  BUFF
+  DEBUFF
+  SHIELD
+  TELEPORT
+  SUMMON
+  STUN
+  SLEEP
+  FEAR
+}
+
+// Skill (Normalized - 3FN)
+model Skill {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  
+  // Type and Effect
+  type            SkillType
+  effect          SkillEffect
+  
+  // Stats
+  power           Int      @default(0)
+  duration        Int?     // in seconds
+  cooldown        Int      @default(0) // in seconds
+  cost            Int      @default(0) // energy/mana cost
+  
+  // Requirements
+  requiredLevel   Int      @default(1)
+  requiredClassId Int?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  classSkills     ClassSkill[]
+  avatarSkills    AvatarSkill[]
+  
+  @@index([type, effect])
+  @@map("skills")
+}
+
+// Class Skill (Junction - N:N between CharacterClass and Skill)
+model ClassSkill {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  classId         Int
+  characterClass  CharacterClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  skillId         String
+  skill           Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  // Level at which this skill is unlocked
+  unlockLevel     Int      @default(1)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([classId, skillId])
+  @@index([classId])
+  @@index([skillId])
+  @@map("class_skills")
+}
+
+// Avatar Skill (Junction - N:N between Avatar and Skill)
+model AvatarSkill {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  avatarId        String
+  avatar          Avatar   @relation(fields: [avatarId], references: [id], onDelete: Cascade)
+  skillId         String
+  skill           Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  // Level of the skill for this avatar
+  level           Int      @default(1)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([avatarId, skillId])
+  @@index([avatarId])
+  @@index([skillId])
+  @@map("avatar_skills")
+}
+
+// ============================================
+// DOMAIN: QUESTS & REWARDS
+// ============================================
+
+// Quest Status (Normalized - 2FN)
+enum QuestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  ABANDONED
+}
+
+// Quest (Normalized - 3FN)
+model Quest {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  
+  // Status
+  status          QuestStatus @default(PENDING)
+  
+  // Progress
+  currentStage    Int      @default(1)
+  totalStages     Int      @default(1)
+  
+  // Relations
+  avatarId        String
+  avatar          Avatar   @relation(fields: [avatarId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  completedAt     DateTime?
+  
+  // Relations
+  rewards         QuestReward[]
+  objectives      QuestObjective[]
+  
+  @@index([avatarId, status])
+  @@map("quests")
+}
+
+// Quest Objective
+model QuestObjective {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  questId         String
+  quest           Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  
+  // Objective details
+  description     String
+  type            String   // kill, collect, talk, reach, etc.
+  targetId        String?  // monsterId, itemId, npcId, locationId, etc.
+  targetCount     Int      @default(1)
+  currentCount    Int      @default(0)
+  
+  // Order
+  order           Int
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([questId, order])
+  @@map("quest_objectives")
+}
+
+// Reward Type (Normalized - 2FN)
+enum RewardType {
+  EXPERIENCE
+  GOLD
+  ITEM
+  SKILL_POINT
+  ATTRIBUTE_POINT
+  REPUTATION
+}
+
+// Quest Reward (Junction - N:N between Quest and Reward)
+model QuestReward {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  questId         String
+  quest           Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  
+  // Reward details
+  type            RewardType
+  value           String   // Can be JSON for complex rewards
+  quantity        Int      @default(1)
+  
+  // For ITEM rewards
+  itemId          String?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([questId])
+  @@map("quest_rewards")
+}
+
+// ============================================
+// DOMAIN: MONSTERS & ENEMIES
+// ============================================
+
+// Monster (Normalized - 3FN)
+model Monster {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  
+  // Stats
+  level           Int      @default(1)
+  health          Int      @default(100)
+  attack          Int      @default(10)
+  defence         Int      @default(5)
+  experience      Int      @default(50)
+  
+  // Attributes
+  strength       Int      @default(5)
+  agility        Int      @default(5)
+  intelligence   Int      @default(5)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  drops           MonsterDrop[]
+  
+  @@index([level])
+  @@map("monsters")
+}
+
+// Monster Drop (Junction - N:N between Monster and Item)
+model MonsterDrop {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  monsterId       String
+  monster         Monster  @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  itemId          String
+  item            Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  // Drop rate (0-100)
+  dropRate        Float    @default(10.0)
+  
+  // Min and Max quantity
+  minQuantity     Int      @default(1)
+  maxQuantity     Int      @default(1)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([monsterId, itemId])
+  @@index([monsterId])
+  @@map("monster_drops")
+}
+
+// ============================================
+// DOMAIN: CRAFTING
+// ============================================
+
+// Crafting Category (Normalized - 2FN)
+enum CraftingCategory {
+  BLACKSMITHING
+  TAILORING
+  ALCHEMY
+  ENGINEERING
+  COOKING
+  ENCHANTING
+  JEWELCRAFTING
+}
+
+// Crafting Recipe (Normalized - 3FN)
+model CraftingRecipe {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  
+  // Result
+  resultItemId    String
+  resultItem      Item     @relation(fields: [resultItemId], references: [id])
+  resultQuantity  Int      @default(1)
+  
+  // Requirements
+  requiredLevel   Int      @default(1)
+  category        CraftingCategory
+  craftingTime    Int      @default(1) // in seconds
+  successRate     Float    @default(100.0) // percentage
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  ingredients     RecipeIngredient[]
+  
+  @@index([category, requiredLevel])
+  @@map("crafting_recipes")
+}
+
+// Recipe Ingredient (Junction - N:N between CraftingRecipe and Item)
+model RecipeIngredient {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  recipeId        String
+  recipe          CraftingRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  itemId          String
+  item            Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  // Quantity needed
+  quantity        Int      @default(1)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([recipeId, itemId])
+  @@index([recipeId])
+  @@map("recipe_ingredients")
+}
+
+// ============================================
+// DOMAIN: SOCIAL (FRIENDS, GUILDS)
+// ============================================
+
+// Friendship (Junction - N:N between User and User)
+model Friendship {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  requesterId     String
+  requester      User     @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId    String
+  addressee      User     @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  
+  // Status
+  status          FriendshipStatus @default(PENDING)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  acceptedAt      DateTime?
+  
+  @@unique([requesterId, addresseeId])
+  @@index([requesterId])
+  @@index([addresseeId])
+  @@map("friendships")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+// ============================================
+// DOMAIN: EVENTS & ANNOUNCEMENTS
+// ============================================
+
+// Event (Normalized - 3FN)
+model Event {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  
+  // Timing
+  startDate       DateTime
+  endDate         DateTime
+  
+  // Status
+  isActive        Boolean  @default(false)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  rewards         EventReward[]
+  
+  @@index([startDate, endDate])
+  @@map("events")
+}
+
+// Event Reward (Junction - N:N between Event and Reward)
+model EventReward {
+  id              String   @id @default(uuid())
+  
+  // Relations
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  // Reward details
+  type            RewardType
+  value           String
+  quantity        Int      @default(1)
+  
+  // For ITEM rewards
+  itemId          String?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([eventId])
+  @@map("event_rewards")
 }

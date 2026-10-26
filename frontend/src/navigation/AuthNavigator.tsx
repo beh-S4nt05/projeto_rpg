@@ -1,8 +1,8 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/domain';
-import LoginScreen from '../screens/auth/LoginScreen';
-import RegisterScreen from '../screens/auth/RegisterScreen';
+import { RootStackParamList } from '../types';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -12,7 +12,6 @@ export const AuthNavigator: React.FC = () => {
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: 'transparent' },
-        cardOverlayEnabled: true,
         animation: 'slide_from_right',
       }}
     >

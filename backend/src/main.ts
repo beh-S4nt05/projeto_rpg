@@ -3,10 +3,16 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import * as helmet from 'helmet';
+import * as compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // Security middleware
+  app.use(helmet());
+  app.use(compression());
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -27,8 +33,7 @@ async function bootstrap() {
   });
 
   // Swagger API Documentation
-  const swaggerEnabled = configService.get<string>('SWAGGER_ENABLED') !== 'false';
-  if (swaggerEnabled) {
+  if (configService.get<string>('NODE_ENV') !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('RPG Game API')
       .setDescription('API for RPG Game - User management, characters, inventory, etc.')
@@ -36,20 +41,18 @@ async function bootstrap() {
       .addBearerAuth()
       .addTag('auth', 'Authentication endpoints')
       .addTag('users', 'User management endpoints')
-      .addTag('avatars', 'Avatar management endpoints')
-      .addTag('atributos', 'Attributes management endpoints')
+      .addTag('characters', 'Character management endpoints')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    const swaggerPath = configService.get<string>('SWAGGER_PATH') || '/api';
-    SwaggerModule.setup(swaggerPath, app, document);
+    SwaggerModule.setup('api', app, document);
   }
 
   const port = configService.get<number>('PORT') || 3000;
   await app.listen(port);
 
   console.log(`Application is running on: http://localhost:${port}`);
-  if (swaggerEnabled) {
+  if (configService.get<string>('NODE_ENV') !== 'production') {
     console.log(`Swagger docs available at: http://localhost:${port}/api`);
   }
 }

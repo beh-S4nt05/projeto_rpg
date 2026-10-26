@@ -1,28 +1,43 @@
-import api from './api/api';
-import { LoginCredentials, RegisterCredentials, AuthResponse, ApiResponse, User } from '../types/domain';
+import api from './api';
+import { LoginCredentials, RegisterCredentials, AuthResponse, ApiResponse } from '../types';
 
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/login', credentials);
-    return response.data;
+    try {
+      const response = await api.post<AuthResponse>('/auth/login', credentials);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || error.message);
+    }
   },
 
-  register: async (credentials: RegisterCredentials): Promise<ApiResponse<User>> => {
-    const response = await api.post<ApiResponse<User>>('/users', credentials);
-    return response.data;
+  register: async (credentials: RegisterCredentials): Promise<AuthResponse> => {
+    try {
+      const response = await api.post<AuthResponse>('/auth/register', {
+        username: credentials.username,
+        name: credentials.name,
+        email: credentials.email,
+        password: credentials.password,
+        confirmPassword: credentials.confirmPassword,
+        phone: credentials.phone,
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || error.message);
+    }
   },
 
-  refreshToken: async (): Promise<{ access_token: string }> => {
-    const response = await api.post<{ access_token: string }>('/auth/refresh');
-    return response.data;
+  refreshToken: async (): Promise<{ accessToken: string }> => {
+    try {
+      const response = await api.post<{ accessToken: string }>('/auth/refresh');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || error.message);
+    }
   },
 
   logout: async (): Promise<void> => {
-    // Just remove tokens from storage
-    // The interceptor will handle the rest
     await AsyncStorage.removeItem('@rpg:token');
     await AsyncStorage.removeItem('@rpg:user');
   },
 };
-
-import AsyncStorage from '@react-native-async-storage/async-storage';

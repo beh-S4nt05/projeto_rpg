@@ -14,7 +14,7 @@ const authPersistConfig = {
 const userPersistConfig = {
   key: 'user',
   storage: AsyncStorage,
-  whitelist: ['user', 'avatar', 'atributos'],
+  whitelist: ['user', 'avatar', 'attributes', 'inventory'],
 };
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
