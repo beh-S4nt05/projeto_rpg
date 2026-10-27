@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --only=production && npm cache clean --force
 
 # Copy source files
 COPY . .
@@ -22,9 +22,10 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package*.json ./
 
-# Install prisma client
-RUN npm install @prisma/client
+# Install prisma client for production
+RUN npm install @prisma/client --production
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \

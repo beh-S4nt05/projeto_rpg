@@ -1,37 +1,41 @@
-import api from './api/api';
-import { User, Avatar, Atributos, ApiResponse } from '../types/domain';
+import api from './api';
+import { User, Avatar, Attributes, Inventory, ApiResponse } from '../types';
 
 export const userService = {
-  getProfile: async (): Promise<{ user: User; avatar?: Avatar; atributos?: Atributos }> => {
-    const response = await api.get<ApiResponse<{ user: User; avatar?: Avatar; atributos?: Atributos }>>('/users/me');
-    return response.data.data || response.data;
+  getProfile: async (): Promise<{
+    user: User;
+    avatar?: Avatar;
+    attributes?: Attributes;
+    inventory?: Inventory;
+  }> => {
+    try {
+      const response = await api.get<ApiResponse<{
+        user: User;
+        avatar?: Avatar;
+        attributes?: Attributes;
+        inventory?: Inventory;
+      }>>('/users/me');
+      return response.data.data || response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || error.message);
+    }
   },
 
   getById: async (id: string): Promise<User> => {
-    const response = await api.get<ApiResponse<User>>(`/users/${id}`);
-    return response.data.data || response.data;
+    try {
+      const response = await api.get<ApiResponse<User>>(`/users/${id}`);
+      return response.data.data || response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || error.message);
+    }
   },
 
   updateProfile: async (id: string, data: Partial<User>): Promise<User> => {
-    const response = await api.put<ApiResponse<User>>(`/users/${id}`, data);
-    return response.data.data || response.data;
-  },
-
-  getAvatar: async (userId: string): Promise<Avatar> => {
-    // TODO: Implement when backend endpoint is ready
-    const response = await api.get<ApiResponse<Avatar>>(`/avatars/user/${userId}`);
-    return response.data.data || response.data;
-  },
-
-  getAtributos: async (avatarId: string): Promise<Atributos> => {
-    // TODO: Implement when backend endpoint is ready
-    const response = await api.get<ApiResponse<Atributos>>(`/atributos/${avatarId}`);
-    return response.data.data || response.data;
-  },
-
-  updateAtributos: async (avatarId: string, data: Partial<Atributos>): Promise<Atributos> => {
-    // TODO: Implement when backend endpoint is ready
-    const response = await api.put<ApiResponse<Atributos>>(`/atributos/${avatarId}`, data);
-    return response.data.data || response.data;
+    try {
+      const response = await api.put<ApiResponse<User>>(`/users/${id}`, data);
+      return response.data.data || response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || error.message);
+    }
   },
 };
