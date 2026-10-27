@@ -70,11 +70,25 @@ model AuthProvider {
 // DOMAIN: CHARACTER (AVATAR)
 // ============================================
 
+// Energy Types Enum
+enum EnergyTypes {
+  MANA
+  STAMINA
+  RAGE
+  ENERGY
+  FOCUS
+  CHI
+  SOUL
+}
+
 // Character Race (Normalized - 2FN)
 model Race {
   id          Int     @id @default(autoincrement())
   name        String  @unique
   description String
+  
+  // Energy types available for this race
+  energyTypes  EnergyTypes[]
   
   // Stats modifiers for this race
   strengthModifier    Int    @default(0)
