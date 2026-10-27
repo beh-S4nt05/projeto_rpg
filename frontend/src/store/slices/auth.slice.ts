@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState, User } from '../../types/domain';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthState, User } from '../../types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -58,42 +57,3 @@ export const {
 } = authSlice.actions;
 
 export default authSlice.reducer;
-
-// Persist auth state
-export const persistAuthState = async (state: AuthState) => {
-  try {
-    if (state.token) {
-      await AsyncStorage.setItem('@rpg:token', state.token);
-    } else {
-      await AsyncStorage.removeItem('@rpg:token');
-    }
-
-    if (state.user) {
-      await AsyncStorage.setItem('@rpg:user', JSON.stringify(state.user));
-    } else {
-      await AsyncStorage.removeItem('@rpg:user');
-    }
-  } catch (error) {
-    console.error('Failed to persist auth state', error);
-  }
-};
-
-// Load auth state
-export const loadAuthState = async (): Promise<AuthState> => {
-  try {
-    const token = await AsyncStorage.getItem('@rpg:token');
-    const userString = await AsyncStorage.getItem('@rpg:user');
-
-    const user: User | null = userString ? JSON.parse(userString) : null;
-
-    return {
-      ...initialState,
-      isAuthenticated: !!token && !!user,
-      user,
-      token,
-      isLoading: false,
-    };
-  } catch (error) {
-    return initialState;
-  }
-};

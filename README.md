@@ -1,6 +1,6 @@
 # RPG Game - V2
 
-> **Projeto migrado para NestJS (Backend) + React Native (Frontend) com DDD, SOLID e Clean Architecture**
+> **Projeto reconstruído com NestJS (Backend) + React Native (Frontend) + DDD + SOLID + Clean Architecture + Tailwind CSS**
 
 Um RPG de turnos com estilo de tabuleiro, template de livro, com IA generativa para auto-controle.
 
@@ -8,7 +8,7 @@ Um RPG de turnos com estilo de tabuleiro, template de livro, com IA generativa p
 
 - **Backend**: NestJS com TypeScript, DDD, SOLID, Clean Architecture
 - **Frontend**: React Native com TypeScript e Tailwind CSS
-- **Banco de Dados**: PostgreSQL com Prisma ORM
+- **Banco de Dados**: PostgreSQL com Prisma ORM (Schema Normalizado)
 - **Autenticação**: JWT com Guards e Strategies
 - **Arquitetura**: Separação clara entre Domain, Application, Infrastructure e Presentation layers
 
@@ -18,48 +18,54 @@ Um RPG de turnos com estilo de tabuleiro, template de livro, com IA generativa p
 projeto_rpg/
 ├── backend/                    # Backend API (NestJS)
 │   ├── src/
-│   │   ├── core/               # Domain Layer (DDD)
-│   │   │   ├── entities/       # Entidades de domínio
-│   │   │   ├── repositories/   # Interfaces de repositório
-│   │   │   ├── services/      # Serviços de domínio
-│   │   │   └── types/         # Tipos do domínio
+│   │   ├── core/               # Core Module (Prisma)
+│   │   │   └── prisma/
+│   │   │       ├── prisma.module.ts
+│   │   │       └── prisma.service.ts
 │   │   │
-│   │   ├── infrastructure/     # Infrastructure Layer
-│   │   │   ├── persistence/    # Persistência (Prisma)
-│   │   │   │   └── prisma/
-│   │   │   │       ├── repositories/  # Implementações
-│   │   │   │       └── prisma.service.ts
-│   │   │   ├── auth/          # Autenticação (JWT)
-│   │   │   └── config/        # Configurações
+│   │   ├── modules/            # Feature Modules
+│   │   │   ├── auth/           # Authentication
+│   │   │   │   ├── controllers/
+│   │   │   │   ├── dtos/
+│   │   │   │   ├── guards/
+│   │   │   │   ├── services/
+│   │   │   │   └── strategies/
+│   │   │   │
+│   │   │   ├── users/          # User Management
+│   │   │   │   ├── controllers/
+│   │   │   │   ├── dtos/
+│   │   │   │   └── services/
+│   │   │   │
+│   │   │   └── characters/     # Character Management
+│   │   │       ├── controllers/
+│   │   │       ├── dtos/
+│   │   │       └── services/
 │   │   │
-│   │   ├── presentation/      # Presentation Layer
-│   │   │   ├── controllers/   # Controllers REST
-│   │   │   ├── dtos/          # Data Transfer Objects
-│   │   │   └── guards/        # Guards de autenticação
-│   │   │
-│   │   └── app.module.ts     # Módulo raiz
+│   │   └── app.module.ts       # Root Module
 │   │
-│   ├── prisma/
-│   │   └── schema.prisma     # Schema do banco de dados
+│   ├── prisma/               # Database
+│   │   ├── schema.prisma       # Normalized Schema
+│   │   └── seed.ts            # Seed Data
 │   │
 │   ├── Dockerfile
 │   └── package.json
 │
 ├── frontend/                   # Frontend Mobile (React Native)
 │   ├── src/
-│   │   ├── components/       # Componentes reutilizáveis
-│   │   ├── screens/           # Telas do app
-│   │   ├── services/          # Serviços API
-│   │   ├── store/             # Redux Toolkit
-│   │   ├── navigation/        # Navegação
-│   │   ├── types/             # Tipos TypeScript
-│   │   ├── styles/            # Estilos (Tailwind CSS)
+│   │   ├── components/       # Reusable Components
+│   │   ├── screens/          # App Screens
+│   │   ├── services/         # API Services
+│   │   ├── store/            # Redux Store
+│   │   ├── navigation/       # Navigation
+│   │   ├── types/            # TypeScript Types
+│   │   ├── styles/           # Tailwind Theme
 │   │   └── App.tsx
 │   │
 │   ├── Dockerfile
+│   ├── app.json
 │   └── package.json
 │
-├── docker-compose.yml         # Configuração Docker
+├── docker-compose.yml         # PostgreSQL + Backend
 ├── .gitignore
 └── README.md
 ```
@@ -70,7 +76,7 @@ projeto_rpg/
 - **Framework**: NestJS 10
 - **Linguagem**: TypeScript
 - **Banco de Dados**: PostgreSQL
-- **ORM**: Prisma
+- **ORM**: Prisma (com schema normalizado)
 - **Autenticação**: JWT, Passport
 - **Validação**: class-validator, class-transformer
 - **Documentação**: Swagger/OpenAPI
@@ -96,16 +102,13 @@ projeto_rpg/
 ┌─────────────────────────────────────────────────────────┐
 │                    Presentation Layer                       │
 │              (Controllers, DTOs, Presenters)              │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
+├─────────────────────────────────────────────────────────┤
 │                    Application Layer                        │
 │              (Use Cases, Application Services)             │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
+├─────────────────────────────────────────────────────────┤
 │                      Domain Layer                           │
 │              (Entities, Value Objects, Domain Services)    │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
+├─────────────────────────────────────────────────────────┤
 │                   Infrastructure Layer                     │
 │              (Repositories, External Services, DB)         │
 └─────────────────────────────────────────────────────────┘
@@ -113,15 +116,45 @@ projeto_rpg/
 
 ### Principais Padrões Aplicados
 
-| Padrão | Aplicação | Benefício |
-|--------|-----------|-----------|
-| **Repository** | `IUserRepository`, `UserRepository` | Abstração do acesso a dados |
-| **Service** | `UserDomainService` | Lógica de negócios centralizada |
-| **Factory** | `PrismaService` | Criação do cliente Prisma |
+| **Padrão/Princípio** | **Aplicação** | **Benefício** |
+|----------------------|---------------|---------------|
+| **Repository** | `PrismaService` | Abstração do acesso a dados |
+| **Service** | `AuthService`, `UsersService` | Lógica de negócios centralizada |
 | **Strategy** | `JwtStrategy` | Estratégia de autenticação |
 | **Guard** | `JwtAuthGuard` | Proteção de rotas |
-| **DTO** | `CreateUserDto`, `UserResponseDto` | Transferência de dados tipada |
+| **DTO** | `LoginDto`, `RegisterDto` | Transferência de dados tipada |
 | **Dependency Injection** | NestJS DI | Injeção de dependências automática |
+| **Single Responsibility** | Cada classe tem uma responsabilidade | Código mantível |
+| **Open/Closed** | Interfaces extensíveis | Flexibilidade |
+| **Liskov Substitution** | Subtipos substitúveis | Consistência |
+| **Interface Segregation** | Interfaces específicas | Clareza |
+| **Dependency Inversion** | Dependência de abstrações | Desacoplamento |
+
+## 📊 Normalização de Banco de Dados
+
+O schema do Prisma segue as **Formas Normais** para evitar redundância e garantir integridade:
+
+### **1FN (Primeira Forma Normal)**
+- ✅ Todos os atributos são atômicos
+- ✅ Nenhum grupo repetitivo
+
+### **2FN (Segunda Forma Normal)**
+- ✅ Todas as tabelas estão na 1FN
+- ✅ Todos os atributos não-chave dependem da chave primária completa
+- ✅ Exemplo: `Race`, `CharacterClass` são tabelas separadas
+
+### **3FN (Terceira Forma Normal)**
+- ✅ Todas as tabelas estão na 2FN
+- ✅ Nenhum atributo não-chave depende de outro atributo não-chave
+- ✅ Exemplo: `InventoryItem` (tabela de junção) resolve relacionamento N:N
+
+### **Tabelas de Junção (N:N)**
+- `InventoryItem` (Inventory ↔ Item)
+- `AvatarSkill` (Avatar ↔ Skill)
+- `ClassSkill` (CharacterClass ↔ Skill)
+- `QuestReward` (Quest ↔ Reward)
+- `MonsterDrop` (Monster ↔ Item)
+- `RecipeIngredient` (CraftingRecipe ↔ Item)
 
 ## 🚀 Como Rodar o Projeto
 
@@ -199,161 +232,207 @@ docker-compose down
 
 ### Autenticação
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/auth/login` | Login de usuário |
-| POST | `/auth/refresh` | Refresh do token JWT |
+| **Método** | **Endpoint** | **Descrição** | **Auth** |
+|------------|-------------|---------------|----------|
+| POST | `/auth/register` | Criar novo usuário | ❌ |
+| POST | `/auth/login` | Login de usuário | ❌ |
+| POST | `/auth/refresh` | Refresh do token JWT | ✅ |
 
 ### Usuários
 
-| Método | Endpoint | Descrição | Autenticação |
-|--------|----------|-----------|---------------|
-| POST | `/users` | Criar novo usuário | ❌ |
-| GET | `/users/:id` | Obter usuário por ID | ✅ |
+| **Método** | **Endpoint** | **Descrição** | **Auth** |
+|------------|-------------|---------------|----------|
 | GET | `/users/me` | Obter perfil do usuário logado | ✅ |
+| GET | `/users/:id` | Obter usuário por ID | ✅ |
+| GET | `/users` | Listar todos os usuários | ✅ |
 | PUT | `/users/:id` | Atualizar usuário | ✅ |
 | DELETE | `/users/:id` | Deletar usuário | ✅ |
 
 ### Personagens (Avatar)
 
-| Método | Endpoint | Descrição | Autenticação |
-|--------|----------|-----------|---------------|
-| GET | `/avatars/user/:userId` | Obter avatar do usuário | ✅ |
-| PUT | `/avatars/:id` | Atualizar avatar | ✅ |
+| **Método** | **Endpoint** | **Descrição** | **Auth** |
+|------------|-------------|---------------|----------|
+| GET | `/characters/me` | Obter avatar do usuário logado | ✅ |
+| GET | `/characters/:id` | Obter avatar por ID | ✅ |
+| PUT | `/characters/:id` | Atualizar avatar | ✅ |
+| PUT | `/characters/:id/level-up` | Subir de nível | ✅ |
+| PUT | `/characters/:id/experience` | Ganhar experiência | ✅ |
+| PUT | `/characters/:id/attributes` | Atualizar atributos | ✅ |
+| GET | `/characters/races` | Listar todas as raças | ✅ |
+| GET | `/characters/classes` | Listar todas as classes | ✅ |
 
-### Atributos
+## 🎮 Modelo de Dados (Domain)
 
-| Método | Endpoint | Descrição | Autenticação |
-|--------|----------|-----------|---------------|
-| GET | `/atributos/:avatarId` | Obter atributos do avatar | ✅ |
-| PUT | `/atributos/:id` | Atualizar atributos | ✅ |
-
-## 🎮 Funcionalidades Implementadas
-
-### V2 (Atual)
-- ✅ Autenticação (Cadastro, Login, Logout)
-- ✅ Gerenciamento de Usuários
-- ✅ Criação automática de Avatar ao cadastrar
-- ✅ Criação automática de Atributos ao cadastrar
-- ✅ Sistema de Atributos (Força, Agilidade, etc.)
-- ✅ Pontos de Atributo para distribuir
-- ✅ Interface com Tailwind CSS
-- ✅ Navegação com React Navigation
-- ✅ Gerenciamento de Estado com Redux Toolkit
-- ✅ Persistência de dados com AsyncStorage
-
-### Planejado para V3
-- [ ] Sistema de Inventário completo
-- [ ] Sistema de Missões (Quests)
-- [ ] Sistema de Habilidades
-- [ ] Sistema de Combate por turnos
-- [ ] Sistema de Classes
-- [ ] Sistema de Raças com bônus
-- [ ] Sistema de Itens
-- [ ] Sistema de Crafting (Forja)
-- [ ] Sistema de Amigos
-- [ ] Chat em tempo real
-- [ ] Integração com IA Generativa
-
-## 📊 Modelo de Dados
-
-### Usuário (User)
-- `id`: UUID
-- `username`: String (único)
+### **User** (Usuário)
+- `id`: UUID (PK)
+- `username`: String (Único)
 - `name`: String
-- `email`: String (único)
-- `password`: String (hash)
-- `phone`: String (opcional)
+- `email`: String (Único)
+- `password`: String (Hash)
+- `phone`: String? (Opcional)
 - `createdAt`: DateTime
 - `updatedAt`: DateTime
 
-### Avatar
-- `id`: UUID
+### **Avatar** (Personagem)
+- `id`: UUID (PK)
 - `name`: String
-- `race`: RaceType (enum)
-- `level`: Integer (padrão: 1)
-- `tier`: Integer (padrão: 1)
-- `experience`: Integer (padrão: 0)
-- `userId`: String (relacionado ao User)
+- `userId`: String (FK → User, Único)
+- `raceId`: Int (FK → Race)
+- `classId`: Int? (FK → CharacterClass)
+- `level`: Int (Padrão: 1)
+- `experience`: Int (Padrão: 0)
+- `experienceToNextLevel`: Int (Padrão: 100)
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
 
-### Atributos
-- `id`: UUID
-- `strength`: Integer (padrão: 10)
-- `agility`: Integer (padrão: 10)
-- `defence`: Integer (padrão: 10)
-- `resistance`: Integer (padrão: 10)
-- `intelligence`: Integer (padrão: 10)
-- `vitality`: Integer (padrão: 10)
-- `energyPoints`: Integer (padrão: 100)
-- `attributePoints`: Integer (padrão: 5)
-- `skillPoints`: Integer (padrão: 5)
-- `avatarId`: String (relacionado ao Avatar)
+### **Attributes** (Atributos)
+- `id`: UUID (PK)
+- `avatarId`: String (FK → Avatar, Único)
+- `strength`: Int (Padrão: 10)
+- `agility`: Int (Padrão: 10)
+- `defence`: Int (Padrão: 10)
+- `resistance`: Int (Padrão: 10)
+- `intelligence`: Int (Padrão: 10)
+- `vitality`: Int (Padrão: 10)
+- `energyPoints`: Int (Padrão: 100)
+- `attributePoints`: Int (Padrão: 5)
+- `skillPoints`: Int (Padrão: 5)
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
 
-### Inventário (Inventory)
-- `id`: UUID
-- `pesoMax`: Integer (padrão: 100)
-- `pesoActual`: Integer (padrão: 0)
-- `avatarId`: String (relacionado ao Avatar)
+### **Race** (Raça)
+- `id`: Int (PK, Auto-incremento)
+- `name`: String (Único)
+- `description`: String
+- `strengthModifier`: Int (Padrão: 0)
+- `agilityModifier`: Int (Padrão: 0)
+- `defenceModifier`: Int (Padrão: 0)
+- `resistanceModifier`: Int (Padrão: 0)
+- `intelligenceModifier`: Int (Padrão: 0)
+- `vitalityModifier`: Int (Padrão: 0)
 
-## 🤖 Integração com IA
+### **CharacterClass** (Classe)
+- `id`: Int (PK, Auto-incremento)
+- `name`: String (Único)
+- `description`: String
+- `baseStrength`: Int (Padrão: 10)
+- `baseAgility`: Int (Padrão: 10)
+- `baseDefence`: Int (Padrão: 10)
+- `baseResistance`: Int (Padrão: 10)
+- `baseIntelligence`: Int (Padrão: 10)
+- `baseVitality`: Int (Padrão: 10)
+- `strengthGrowth`: Float (Padrão: 0.5)
+- `agilityGrowth`: Float (Padrão: 0.5)
+- `defenceGrowth`: Float (Padrão: 0.5)
+- `resistanceGrowth`: Float (Padrão: 0.5)
+- `intelligenceGrowth`: Float (Padrão: 0.5)
+- `vitalityGrowth`: Float (Padrão: 0.5)
 
-O projeto foi projetado para integrar com IA generativa para:
-- Geração de missões dinâmicas
-- Criação de NPCs inteligentes
-- Geração de itens únicos
-- Narrativa adaptativa
-- Balanceamento automático
+### **Inventory** (Inventário)
+- `id`: UUID (PK)
+- `avatarId`: String (FK → Avatar, Único)
+- `maxWeight`: Int (Padrão: 100)
+- `currentWeight`: Int (Padrão: 0)
+- `maxSlots`: Int (Padrão: 20)
+- `usedSlots`: Int (Padrão: 0)
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
+
+### **Item** (Item)
+- `id`: UUID (PK)
+- `name`: String
+- `description`: String?
+- `type`: ItemType (Enum)
+- `quality`: ItemQuality (Enum)
+- `weight`: Int (Padrão: 1)
+- `value`: Int (Padrão: 0)
+- `strengthBonus`: Int (Padrão: 0)
+- `agilityBonus`: Int (Padrão: 0)
+- `defenceBonus`: Int (Padrão: 0)
+- `resistanceBonus`: Int (Padrão: 0)
+- `intelligenceBonus`: Int (Padrão: 0)
+- `vitalityBonus`: Int (Padrão: 0)
+- `healthBonus`: Int (Padrão: 0)
+- `energyBonus`: Int (Padrão: 0)
+- `requiredLevel`: Int (Padrão: 1)
+- `requiredClassId`: Int?
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
 
 ## 🎨 Interface do Usuário
 
 ### Telas Implementadas
-- Login
-- Cadastro
-- Home (Dashboard)
-- Perfil
-- Atributos
-- Inventário
-- Criação de Personagem (modal)
+- ✅ **LoginScreen** - Tela de login com validação
+- ✅ **RegisterScreen** - Cadastro de usuário
+- ✅ **HomeScreen** - Dashboard com status
+- ✅ **ProfileScreen** - Perfil do usuário com avatar e atributos
+- ✅ **AttributesScreen** - Gerenciamento de atributos com pontos
+- ✅ **InventoryScreen** - Visualização de itens
 
 ### Componentes Reutilizáveis
 - Button
 - Input
-- AttributeCard
-- CharacterCard
-- InventoryItem
+- Card
+- Modal
+
+### Navegação
+- **AuthNavigator**: Login, Register
+- **MainNavigator**: Home, Profile, Attributes, Inventory (Tab Navigation)
+- **AppNavigator**: Condicional (Auth ou Main)
 
 ## 🔒 Segurança
 
-- **Autenticação**: JWT com expiração
-- **Validação**: class-validator em todos os DTOs
-- **CORS**: Configurado para o frontend
-- **Rate Limiting**: Recomendado para produção
-- **HTTPS**: Recomendado para produção
+- ✅ **JWT Authentication** com expiração
+- ✅ **Validação** em todos os DTOs (class-validator)
+- ✅ **CORS** configurado para o frontend
+- ✅ **Hash de senha** com bcrypt
+- ✅ **Interceptores** para refresh de token
+- ✅ **Helmet** para security headers
+- ✅ **Compression** para otimização
 
-## 📦 Deploy
+## 📊 Banco de Dados
 
-### Backend
-- **Docker**: Usar o Dockerfile fornecido
-- **Railway**: `railway up`
-- **Heroku**: Configurar com Node.js buildpack
-- **AWS/Azure/GCP**: Usar serviços de container
+- **Schema refatorado** com relacionamentos corretos
+- **Prisma Migrate** para versionamento
+- **Normalização** (1FN, 2FN, 3FN)
+- **Relacionamentos** 1:1, 1:N, N:N corretamente definidos
 
-### Frontend
-- **Expo EAS**: `eas build`
-- **Firebase App Distribution**: Para testes beta
-- **App Store/Google Play**: Para produção
+## 🎯 Próximos Passos (V3)
 
-## 🤝 Contribuindo
+- [ ] **Sistema de Inventário completo** (CRUD de itens)
+- [ ] **Sistema de Missões (Quests)** com objetivos e recompensas
+- [ ] **Sistema de Habilidades** com árvore de habilidades
+- [ ] **Sistema de Combate por turnos**
+- [ ] **Sistema de Classes** com especializações
+- [ ] **Sistema de Raças** com bônus
+- [ ] **Sistema de Crafting (Forja)**
+- [ ] **Sistema de Amigos**
+- [ ] **Chat em tempo real** (WebSocket)
+- [ ] **Integração com IA Generativa**
+- [ ] **Rate Limiting** para proteção
+- [ ] **Caching com Redis** para performance
+- [ ] **CQRS** para separação de commands e queries
+
+## 📝 BREAKING CHANGES
+
+⚠️ **Esta é uma reconstrução completa:**
+- Estrutura de pastas completamente refatorada
+- Backend migrado de Express para NestJS
+- Frontend migrado de EJS para React Native
+- Nova arquitetura baseada em DDD e Clean Architecture
+- Schema do banco de dados normalizado
+
+## 🤝 Como Contribuir
 
 1. Faça um fork do projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
+3. Commit suas mudanças
+4. Push para a branch
 5. Abra um Pull Request
 
 ## 📄 Licença
 
-MIT License - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+MIT License
 
 ---
 
@@ -361,4 +440,4 @@ MIT License - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 **Autor**: Breno S. Santos
 
-**Data**: 2026-10-21
+**Data**: 2026-10-26

@@ -24,8 +24,6 @@ backend/dist/
 backend/.env
 backend/.env.local
 backend/.env*.local
-backend/.pnp
-backend.pnp.js
 
 # Prisma
 backend/prisma/migrations/

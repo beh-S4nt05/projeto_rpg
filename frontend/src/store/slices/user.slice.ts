@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User, Avatar, Atributos } from '../../types/domain';
+import { User, Avatar, Attributes, Inventory } from '../../types';
 
 interface UserState {
   user: User | null;
   avatar: Avatar | null;
-  atributos: Atributos | null;
+  attributes: Attributes | null;
+  inventory: Inventory | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -12,7 +13,8 @@ interface UserState {
 const initialState: UserState = {
   user: null,
   avatar: null,
-  atributos: null,
+  attributes: null,
+  inventory: null,
   isLoading: false,
   error: null,
 };
@@ -28,11 +30,13 @@ const userSlice = createSlice({
     fetchUserSuccess(state, action: PayloadAction<{
       user: User;
       avatar?: Avatar;
-      atributos?: Atributos;
+      attributes?: Attributes;
+      inventory?: Inventory;
     }>) {
       state.user = action.payload.user;
       state.avatar = action.payload.avatar || null;
-      state.atributos = action.payload.atributos || null;
+      state.attributes = action.payload.attributes || null;
+      state.inventory = action.payload.inventory || null;
       state.isLoading = false;
       state.error = null;
     },
@@ -50,15 +54,21 @@ const userSlice = createSlice({
         state.avatar = { ...state.avatar, ...action.payload };
       }
     },
-    updateAtributos(state, action: PayloadAction<Partial<Atributos>>) {
-      if (state.atributos) {
-        state.atributos = { ...state.atributos, ...action.payload };
+    updateAttributes(state, action: PayloadAction<Partial<Attributes>>) {
+      if (state.attributes) {
+        state.attributes = { ...state.attributes, ...action.payload };
+      }
+    },
+    updateInventory(state, action: PayloadAction<Partial<Inventory>>) {
+      if (state.inventory) {
+        state.inventory = { ...state.inventory, ...action.payload };
       }
     },
     clearUser(state) {
       state.user = null;
       state.avatar = null;
-      state.atributos = null;
+      state.attributes = null;
+      state.inventory = null;
       state.isLoading = false;
       state.error = null;
     },
@@ -71,7 +81,8 @@ export const {
   fetchUserFailure,
   updateUser,
   updateAvatar,
-  updateAtributos,
+  updateAttributes,
+  updateInventory,
   clearUser
 } = userSlice.actions;
 
