@@ -1,11 +1,12 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { RootStackParamList } from '../types/domain';
-import HomeScreen from '../screens/main/HomeScreen';
-import ProfileScreen from '../screens/main/ProfileScreen';
-import AttributesScreen from '../screens/main/AttributesScreen';
-import InventoryScreen from '../screens/main/InventoryScreen';
+import { RootStackParamList } from '../types';
+import HomeScreen from '../screens/HomeScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import AttributesScreen from '../screens/AttributesScreen';
+import InventoryScreen from '../screens/InventoryScreen';
+import { useTailwind } from 'tailwind-rn';
 import Icon from '@expo/vector-icons/FontAwesome5';
 import { colors } from '../styles/theme';
 
@@ -29,6 +30,8 @@ const MainStackNavigator: React.FC = () => {
 };
 
 export const MainNavigator: React.FC = () => {
+  const tailwind = useTailwind();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

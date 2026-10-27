@@ -8,12 +8,12 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#FFD700', // Gold
+          DEFAULT: '#FFD700',
           dark: '#CC9900',
           light: '#FFE680',
         },
         secondary: {
-          DEFAULT: '#4B0082', // Purple
+          DEFAULT: '#4B0082',
           dark: '#360060',
           light: '#8A2BE2',
         },
@@ -32,6 +32,7 @@ module.exports = {
           danger: '#F44336',
           warning: '#FF9800',
           info: '#2196F3',
+          gold: '#FFD700',
         },
       },
       fontFamily: {

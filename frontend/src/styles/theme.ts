@@ -1,11 +1,11 @@
 export const colors = {
   primary: {
-    DEFAULT: '#FFD700', // Gold
+    DEFAULT: '#FFD700',
     dark: '#CC9900',
     light: '#FFE680',
   },
   secondary: {
-    DEFAULT: '#4B0082', // Purple
+    DEFAULT: '#4B0082',
     dark: '#360060',
     light: '#8A2BE2',
   },
