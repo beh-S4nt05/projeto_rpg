@@ -16,20 +16,29 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rpg.game"
+      "bundleIdentifier": "com.rpg.game",
+      "infoPlist": {
+        "UIRequiredDeviceCapabilities": ["armv7"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1a1a1a"
       },
-      "package": "com.rpg.game"
+      "package": "com.rpg.game",
+      "permissions": []
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
       "expo-dev-client"
-    ]
+    ],
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "sdkVersion": "51.0.0"
   }
 }
